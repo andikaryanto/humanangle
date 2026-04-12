@@ -1,0 +1,122 @@
+name: Deploy Production (WordPress App -> Infra Repo)
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: true
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      image_tag: ${{ steps.meta.outputs.image_tag }}
+      image_repo: ${{ steps.meta.outputs.image_repo }}
+    steps:
+      - name: Checkout Repo
+        uses: actions/checkout@v4
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Prepare Image Metadata
+        id: meta
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_REPO="${{ vars.IMAGE_REPO }}"
+          IMAGE_TAG="${GITHUB_SHA}"
+          echo "image_repo=${IMAGE_REPO}" >> "${GITHUB_OUTPUT}"
+          echo "image_tag=${IMAGE_TAG}" >> "${GITHUB_OUTPUT}"
+          echo "APP_IMAGE=${IMAGE_REPO}:${IMAGE_TAG}" >> "${GITHUB_ENV}"
+          echo "APP_IMAGE_LATEST=${IMAGE_REPO}:latest" >> "${GITHUB_ENV}"
+
+      - name: Build and Push App Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile
+          push: true
+          tags: |
+            ${{ env.APP_IMAGE }}
+            ${{ env.APP_IMAGE_LATEST }}
+
+  deploy-prod:
+    runs-on: ubuntu-latest
+    needs: build-and-push
+    permissions:
+      contents: read
+    environment: production
+    steps:
+      - name: Checkout App Repo
+        uses: actions/checkout@v4
+
+      - name: Resolve Infra Repo Owner/Name
+        id: infra_repo
+        shell: bash
+        run: |
+          set -euo pipefail
+          REPO="${{ vars.INFRA_REPO }}"
+          echo "owner=${REPO%%/*}" >> "$GITHUB_OUTPUT"
+          echo "name=${REPO##*/}" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub App Token (Infra Repo)
+        id: app_token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ secrets.GH_APP_ID }}
+          private-key: ${{ secrets.GH_APP_PRIVATE_KEY }}
+          owner: ${{ steps.infra_repo.outputs.owner }}
+          repositories: ${{ steps.infra_repo.outputs.name }}
+
+      - name: Checkout Infra Repo
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ vars.INFRA_REPO }}
+          token: ${{ steps.app_token.outputs.token }}
+          path: infra-ops
+
+      - name: Start SSH Agent
+        uses: webfactory/ssh-agent@v0.9.0
+        with:
+          ssh-private-key: ${{ secrets.PROD_SSH_PRIVATE_KEY }}
+
+      - name: Add Production Host to known_hosts
+        shell: bash
+        run: |
+          set -euo pipefail
+          source infra-ops/infra_humanangle/servers/prod.env
+          mkdir -p ~/.ssh
+          ssh-keyscan -p "${SERVER_SSH_PORT}" "${SERVER_HOST}" >> ~/.ssh/known_hosts
+
+      - name: Provision App
+        shell: bash
+        env:
+          IMAGE_TAG_TO_DEPLOY: ${{ needs.build-and-push.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          cp infra-ops/infra_humanangle/servers/prod.env /tmp/prod.env
+          sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG_TO_DEPLOY}/" /tmp/prod.env
+          bash infra-ops/infra_humanangle/scripts/20_provision_app.sh /tmp/prod.env
+
+      - name: Deploy to Production
+        shell: bash
+        env:
+          IMAGE_TAG_TO_DEPLOY: ${{ needs.build-and-push.outputs.image_tag }}
+        run: |
+          set -euo pipefail
+          cp infra-ops/infra_humanangle/servers/prod.env /tmp/prod.env
+          sed -i "s/^IMAGE_TAG=.*/IMAGE_TAG=${IMAGE_TAG_TO_DEPLOY}/" /tmp/prod.env
+          bash infra-ops/infra_humanangle/scripts/30_deploy.sh /tmp/prod.env
