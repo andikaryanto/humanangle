@@ -1,0 +1,95 @@
+name: deploy-wordpress
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      env_file:
+        description: "Path env file, contoh: infra_humanangle/servers/prod.env"
+        required: true
+        default: "infra_humanangle/servers/prod.env"
+      bootstrap_server:
+        description: "Jalankan bootstrap server sebelum provision/deploy"
+        required: true
+        type: boolean
+        default: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Resolve image coordinates
+        id: image
+        shell: bash
+        run: |
+          ENV_FILE="${{ inputs.env_file }}"
+          if [ -z "$ENV_FILE" ]; then
+            ENV_FILE="infra_humanangle/servers/prod.env"
+          fi
+          # shellcheck disable=SC1090
+          source "$ENV_FILE"
+          echo "registry=${IMAGE_REGISTRY}" >> "$GITHUB_OUTPUT"
+          echo "name=${IMAGE_NAME}" >> "$GITHUB_OUTPUT"
+          echo "tag=${GITHUB_SHA}" >> "$GITHUB_OUTPUT"
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./infra_humanangle/docker/images/wordpress/Dockerfile
+          push: true
+          tags: |
+            ${{ steps.image.outputs.registry }}/${{ steps.image.outputs.name }}:${{ steps.image.outputs.tag }}
+            ${{ steps.image.outputs.registry }}/${{ steps.image.outputs.name }}:latest
+
+      - name: Install SSH key
+        shell: bash
+        run: |
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Bootstrap server
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.bootstrap_server }}
+        shell: bash
+        run: |
+          ENV_FILE="${{ inputs.env_file }}"
+          if [ -z "$ENV_FILE" ]; then ENV_FILE="infra_humanangle/servers/prod.env"; fi
+          bash infra_humanangle/scripts/10_bootstrap.sh "$ENV_FILE"
+
+      - name: Provision app
+        shell: bash
+        run: |
+          ENV_FILE="${{ inputs.env_file }}"
+          if [ -z "$ENV_FILE" ]; then ENV_FILE="infra_humanangle/servers/prod.env"; fi
+          bash infra_humanangle/scripts/20_provision_app.sh "$ENV_FILE"
+
+      - name: Deploy app
+        shell: bash
+        env:
+          IMAGE_REGISTRY_OVERRIDE: ${{ steps.image.outputs.registry }}
+          IMAGE_NAME_OVERRIDE: ${{ steps.image.outputs.name }}
+          IMAGE_TAG_OVERRIDE: ${{ steps.image.outputs.tag }}
+        run: |
+          ENV_FILE="${{ inputs.env_file }}"
+          if [ -z "$ENV_FILE" ]; then ENV_FILE="infra_humanangle/servers/prod.env"; fi
+          bash infra_humanangle/scripts/30_deploy.sh "$ENV_FILE"
