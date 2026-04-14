@@ -37,10 +37,6 @@ get_header();
 					</div>
 				</div>
 				<aside class="sidebar-stack">
-					<section class="sidebar-panel">
-						<h2 class="sidebar-title"><?php esc_html_e( 'Key Takeaway', 'humanangle-issues' ); ?></h2>
-						<p class="archive-excerpt"><?php echo esc_html( wp_trim_words( get_the_excerpt(), 34 ) ); ?></p>
-					</section>
 					<section class="sidebar-panel sidebar-panel-related">
 						<h2 class="sidebar-title sidebar-title-accent"><?php esc_html_e( 'Baca Juga', 'humanangle-issues' ); ?></h2>
 						<?php if ( $sidebar_query->have_posts() ) : ?>
