@@ -98,17 +98,6 @@ $portal_sections    = array(
 );
 ?>
 <main class="ha-shell">
-	<section class="billboard-banner" aria-label="<?php esc_attr_e( 'Editorial campaign banner', 'humanangle-issues' ); ?>">
-		<div class="billboard-inner">
-			<div class="billboard-kicker"><?php esc_html_e( 'Focus This Week', 'humanangle-issues' ); ?></div>
-			<div class="billboard-copy">
-				<h2><?php esc_html_e( 'Food insecurity, war, and climate disruption are not distant issues. Their impact is already shaping everyday life.', 'humanangle-issues' ); ?></h2>
-				<p><?php esc_html_e( 'This banner area can be used for special reporting packages, sponsored placements, or major editorial campaigns with a classic news portal feel.', 'humanangle-issues' ); ?></p>
-			</div>
-			<div class="billboard-tag"><?php esc_html_e( 'World Social Desk', 'humanangle-issues' ); ?></div>
-		</div>
-	</section>
-
 	<?php if ( $featured_query->have_posts() ) : ?>
 		<section class="hero-grid home-lead-grid">
 			<?php
