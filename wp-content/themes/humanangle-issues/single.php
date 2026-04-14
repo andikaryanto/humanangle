@@ -12,28 +12,8 @@ get_header();
 	while ( have_posts() ) :
 		the_post();
 		$current_post_id = get_the_ID();
-		$category_ids    = wp_list_pluck( get_the_category(), 'term_id' );
-		$related_query = new WP_Query(
-			array(
-				'post_type'           => 'post',
-				'posts_per_page'      => 3,
-				'post__not_in'        => array( $current_post_id ),
-				'ignore_sticky_posts' => true,
-				'category__in'        => $category_ids,
-			)
-		);
-		$more_posts_args = array(
-			'post_type'           => 'post',
-			'posts_per_page'      => 4,
-			'post__not_in'        => array( $current_post_id ),
-			'ignore_sticky_posts' => true,
-		);
-
-		if ( ! empty( $category_ids ) ) {
-			$more_posts_args['category__in'] = $category_ids;
-		}
-
-		$more_posts_query = new WP_Query( $more_posts_args );
+		$related_query    = humanangle_issues_recommended_posts( $current_post_id, 3 );
+		$more_posts_query = humanangle_issues_recommended_posts( $current_post_id, 4 );
 		?>
 		<article <?php post_class( 'entry-shell' ); ?>>
 			<div class="entry-layout">
@@ -63,7 +43,7 @@ get_header();
 					</section>
 					<?php if ( $related_query->have_posts() ) : ?>
 						<section class="sidebar-panel">
-							<h2 class="sidebar-title"><?php esc_html_e( 'Related', 'humanangle-issues' ); ?></h2>
+							<h2 class="sidebar-title"><?php esc_html_e( 'Artikel Lain', 'humanangle-issues' ); ?></h2>
 							<div class="compact-list">
 								<?php
 								while ( $related_query->have_posts() ) :

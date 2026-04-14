@@ -137,3 +137,61 @@ function humanangle_issues_section_query( $category_id, $exclude = array(), $pos
 		)
 	);
 }
+
+function humanangle_issues_recommended_posts( $post_id, $limit = 4 ) {
+	$post_id      = (int) $post_id;
+	$limit        = max( 1, (int) $limit );
+	$category_ids = wp_list_pluck( get_the_category( $post_id ), 'term_id' );
+	$post_ids     = array();
+
+	if ( ! empty( $category_ids ) ) {
+		$same_category = get_posts(
+			array(
+				'post_type'           => 'post',
+				'post_status'         => 'publish',
+				'numberposts'         => $limit,
+				'post__not_in'        => array( $post_id ),
+				'ignore_sticky_posts' => true,
+				'category__in'        => $category_ids,
+				'fields'              => 'ids',
+			)
+		);
+
+		$post_ids = array_map( 'intval', $same_category );
+	}
+
+	if ( count( $post_ids ) < $limit ) {
+		$fallback = get_posts(
+			array(
+				'post_type'           => 'post',
+				'post_status'         => 'publish',
+				'numberposts'         => $limit - count( $post_ids ),
+				'post__not_in'        => array_merge( array( $post_id ), $post_ids ),
+				'ignore_sticky_posts' => true,
+				'fields'              => 'ids',
+			)
+		);
+
+		$post_ids = array_merge( $post_ids, array_map( 'intval', $fallback ) );
+	}
+
+	if ( empty( $post_ids ) ) {
+		return new WP_Query(
+			array(
+				'post_type'      => 'post',
+				'post__in'       => array( 0 ),
+				'posts_per_page' => 0,
+			)
+		);
+	}
+
+	return new WP_Query(
+		array(
+			'post_type'           => 'post',
+			'post__in'            => $post_ids,
+			'orderby'             => 'post__in',
+			'posts_per_page'      => count( $post_ids ),
+			'ignore_sticky_posts' => true,
+		)
+	);
+}
