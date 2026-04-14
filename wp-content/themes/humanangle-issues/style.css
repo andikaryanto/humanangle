@@ -572,6 +572,28 @@ select {
     padding: 20px;
 }
 
+.single-more-posts {
+    padding-inline: 4px;
+}
+
+.single-more-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.single-more-grid .story-card {
+    grid-template-columns: 1fr;
+    padding: 0;
+}
+
+.single-more-grid .story-card-thumb {
+    min-height: 220px;
+    border-radius: 0;
+}
+
+.single-more-grid .story-card-body {
+    padding: 20px;
+}
+
 .sidebar-stack {
     display: grid;
     gap: 18px;
@@ -847,7 +869,8 @@ select {
     .entry-layout,
     .topic-grid,
     .archive-grid,
-    .portal-grid {
+    .portal-grid,
+    .single-more-grid {
         grid-template-columns: 1fr;
     }
 
@@ -900,7 +923,8 @@ select {
 
     .story-grid,
     .topic-grid,
-    .portal-grid {
+    .portal-grid,
+    .single-more-grid {
         grid-template-columns: 1fr;
     }
 
