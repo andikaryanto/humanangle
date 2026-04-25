@@ -38,7 +38,7 @@ get_header();
 				</div>
 				<aside class="sidebar-stack">
 					<section class="sidebar-panel sidebar-panel-related">
-						<h2 class="sidebar-title sidebar-title-accent"><?php esc_html_e( 'Baca Juga', 'humanangle-issues' ); ?></h2>
+						<h2 class="sidebar-title sidebar-title-accent"><?php esc_html_e( 'Discover More', 'humanangle-issues' ); ?></h2>
 						<?php if ( $sidebar_query->have_posts() ) : ?>
 							<div class="related-visual-list">
 								<?php
@@ -46,13 +46,6 @@ get_header();
 									$sidebar_query->the_post();
 									?>
 									<article class="related-visual-item">
-										<a class="related-visual-thumb" href="<?php the_permalink(); ?>" aria-hidden="true" tabindex="-1">
-											<?php
-											if ( has_post_thumbnail() ) {
-												the_post_thumbnail( 'medium' );
-											}
-											?>
-										</a>
 										<div class="related-visual-body">
 											<h3><a href="<?php the_permalink(); ?>"><?php the_title(); ?></a></h3>
 											<p class="related-date"><?php echo esc_html( get_the_date() ); ?></p>
@@ -71,7 +64,7 @@ get_header();
 			<div class="section-heading">
 				<div>
 					<div class="section-label"><?php esc_html_e( 'Continue Reading', 'humanangle-issues' ); ?></div>
-					<h2 class="section-title"><?php esc_html_e( 'Baca Juga', 'humanangle-issues' ); ?></h2>
+					<h2 class="section-title"><?php esc_html_e( 'Discover More', 'humanangle-issues' ); ?></h2>
 				</div>
 			</div>
 			<?php if ( $more_posts_query->have_posts() ) : ?>
