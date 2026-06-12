@@ -40,6 +40,17 @@ function humanangle_issues_enqueue_assets() {
 }
 add_action( 'wp_enqueue_scripts', 'humanangle_issues_enqueue_assets' );
 
+function humanangle_issues_site_icon() {
+	$icon_url = get_theme_file_uri( 'assets/icons/favicon.svg' );
+
+	printf(
+		'<link rel="icon" href="%1$s" type="image/svg+xml">' . "\n",
+		esc_url( $icon_url )
+	);
+}
+add_action( 'wp_head', 'humanangle_issues_site_icon' );
+add_action( 'admin_head', 'humanangle_issues_site_icon' );
+
 function humanangle_issues_menu_fallback() {
 	$categories = get_categories(
 		array(

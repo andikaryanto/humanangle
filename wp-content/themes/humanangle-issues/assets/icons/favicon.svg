@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <rect width="128" height="128" fill="#062432"/>
+  <g transform="translate(11 8) rotate(-5 53 56) skewX(-8)">
+    <rect width="106" height="112" rx="15" fill="#d8ff31"/>
+    <text x="53" y="70" fill="#062432" font-family="Impact, Arial Black, Arial, sans-serif" font-size="48" font-style="italic" font-weight="900" text-anchor="middle" letter-spacing="-5">HA</text>
+  </g>
+</svg>
