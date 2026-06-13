@@ -6,7 +6,7 @@ Description: Editorial WordPress theme for global social issues coverage.
 Requires at least: 6.0
 Tested up to: 6.9
 Requires PHP: 7.4
-Version: 1.0.0
+Version: 1.0.5
 License: GNU General Public License v2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 Text Domain: humanangle-issues
@@ -284,11 +284,11 @@ select {
 .header-nav-row {
     display: flex;
     align-items: center;
-    gap: 24px;
+    gap: 16px;
     width: min(1440px, calc(100vw - 48px));
-    min-height: 58px;
+    min-height: 54px;
     margin: 0 auto;
-    padding: 8px 0;
+    padding: 7px 0;
 }
 
 .primary-navigation {
@@ -300,11 +300,11 @@ select {
 .primary-menu ul {
     display: flex;
     align-items: center;
-    gap: 8px 30px;
+    gap: 5px 22px;
     margin: 0;
     padding: 0;
     list-style: none;
-    flex-wrap: nowrap;
+    flex-wrap: wrap;
 }
 
 .primary-menu li {
@@ -314,27 +314,31 @@ select {
 .primary-menu a {
     color: #f4f5f6;
     font-weight: 800;
-    font-size: clamp(0.9rem, 1vw, 1.08rem);
+    font-size: clamp(0.74rem, 0.74vw, 0.86rem);
     text-transform: uppercase;
-    letter-spacing: 0.02em;
+    letter-spacing: 0.01em;
     display: inline-flex;
     align-items: center;
-    min-height: 34px;
+    min-height: 26px;
     white-space: nowrap;
 }
 
+.primary-menu a:hover {
+    color: #d8ff31;
+}
+
 .header-search {
-    width: 220px;
+    width: 188px;
     flex: 0 0 auto;
 }
 
 .search-form {
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 6px;
     border-radius: 999px;
     background: #405262;
-    padding: 5px 10px 5px 18px;
+    padding: 4px 9px 4px 16px;
 }
 
 .search-form label {
@@ -347,8 +351,8 @@ select {
     background: transparent;
     color: #fff;
     outline: 0;
-    min-height: 34px;
-    font-size: 0.95rem;
+    min-height: 30px;
+    font-size: 0.86rem;
 }
 
 .search-form input::placeholder {
@@ -1055,28 +1059,27 @@ select {
     }
 
     .header-nav-row {
-        min-height: 56px;
-        gap: 18px;
+        min-height: 52px;
+        gap: 12px;
     }
 
     .primary-menu,
     .primary-menu ul {
-        gap: 6px 22px;
-        flex-wrap: wrap;
+        gap: 5px 16px;
     }
 
     .primary-menu a {
-        font-size: 0.9rem;
-        min-height: 34px;
+        font-size: 0.74rem;
+        min-height: 24px;
     }
 
     .header-search {
-        width: 210px;
+        width: 176px;
     }
 
     .search-form input[type="search"] {
-        min-height: 34px;
-        font-size: 0.92rem;
+        min-height: 30px;
+        font-size: 0.84rem;
     }
 }
 
@@ -1112,6 +1115,10 @@ select {
         flex-direction: column;
         align-items: stretch;
         padding: 12px 0;
+    }
+
+    .primary-navigation {
+        width: 100%;
     }
 
     .header-search {
@@ -1216,13 +1223,13 @@ select {
 
     .primary-menu,
     .primary-menu ul {
-        gap: 4px 14px;
+        gap: 5px 14px;
         justify-content: center;
     }
 
     .primary-menu a {
-        min-height: 30px;
-        font-size: 0.82rem;
+        min-height: 26px;
+        font-size: 0.74rem;
     }
 
     .billboard-copy h2 {
